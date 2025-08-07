@@ -1,53 +1,41 @@
 #include <stdbool.h>
-#include <stdio.h>
 #include <raylib.h>
+#include "gui_elements.h"
+#include "init.h"
+#include "structs.h"
 
 #define RAYGUI_IMPLEMENTATION
 #include <raygui.h>
 
+App app;
+Gui gui;
+
 int main()
 {
-    int S_W = 900;
-    int S_H = 600;
+    memset(&app, 0, sizeof(App));
+    app.S_W = 900;
+    app.S_H = 600;
 
-    bool show_main_screen = true;
-    bool show_add_item_screen = false;
-
-    char* buffer = calloc(1024, sizeof(char));
-    strncpy(buffer, "", 1024);
+    SetTargetFPS(60);
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
-    InitWindow(S_W, S_H, "TODO App");
+    InitWindow(app.S_W, app.S_H, "TODO App");
 
-    Font font = LoadFont("./fonts/TerminessNerdFont-Bold.ttf");
+    init_fonts();
+    init_gui();
+    initialize_gui_elements();
 
     while (!WindowShouldClose())
     {
         if (IsWindowResized() && !IsWindowFullscreen())
         {
-            S_W = GetScreenWidth();
-            S_H = GetScreenHeight();
+            app.S_W = GetScreenWidth();
+            app.S_H = GetScreenHeight();
         }
+        gui_elements_logic();
         BeginDrawing();
         ClearBackground(BLACK);
-        GuiSetFont(font);
-        GuiSetStyle(DEFAULT, TEXT_SIZE, 18);
-        if (show_main_screen)
-        {
-            if (GuiButton((Rectangle) {100.0f, 100.0f, 100.0f, 30.0f}, "New item") == true)
-            {
-                show_main_screen = false;
-                show_add_item_screen = true;
-            }
-        }
-        if (show_add_item_screen)
-        {
-            if (GuiTextInputBox((Rectangle){300.0f, 300.0f, 450.0f, 150.0f}, 0, "Enter item summary", "New item", buffer, 1024, false) == true)
-            {
-                show_add_item_screen = false;
-                show_main_screen = true;
-            }
-        }
+        draw_main_page();
         EndDrawing();
     }
     
