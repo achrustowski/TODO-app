@@ -38,8 +38,10 @@ typedef struct
 
 typedef struct
 {
+    Rectangle   dimensions;
     char        label[20];
-    bool        is_active;
+    bool        is_pressed;
+    int         font_size;
 } Button;
 
 typedef struct
