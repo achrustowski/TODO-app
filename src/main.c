@@ -21,8 +21,9 @@ int main()
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
     InitWindow(app.S_W, app.S_H, "TODO App");
 
-    init_fonts();
     init_gui();
+    init_fonts();
+    init_gui_style();
     initialize_gui_elements();
 
     while (!WindowShouldClose())

@@ -1,5 +1,6 @@
 #include <raygui.h>
 #include "gui_elements.h"
+#include "defs.h"
 #include "draw.h"
 #include "raylib.h"
 #include "structs.h"
@@ -9,16 +10,18 @@
 extern App app;
 extern Gui gui;
 
-static Textbox new_item_textbox;
+static Textbox input_boxes[4];
 
-static void set_gui_defaults(void);
-static void add_new_item_textbox(void);
+static Textbox add_new_item_textbox(float y);
 static void textbox_interact(Textbox* textbox);
 static void draw_text(Textbox* textbox);
 
 void gui_elements_logic()
 {
-    textbox_interact(&new_item_textbox);
+    for (int i = 0; i < 5; i++)
+    {
+        textbox_interact(&input_boxes[i]);
+    }
 };
 
 static void textbox_interact(Textbox* textbox)
@@ -72,43 +75,40 @@ static void textbox_interact(Textbox* textbox)
 
 static void draw_text(Textbox* textbox)
 {
-    DrawText(textbox->buffer, (int)textbox->dimensions.x + 5, (int)textbox->dimensions.y + 5, textbox->font_size, MAROON);
+    //draw actuall textbox buffer onto the screen, at this point x & y padding values are constants, can they be dynamic?
+    DrawText(textbox->buffer, (int)textbox->dimensions.x + 5, (int)textbox->dimensions.y + 10, textbox->font_size, RAYWHITE);
 };
 
 void initialize_gui_elements()
 {
-    set_gui_defaults();
-    add_new_item_textbox();
+    for (int i = 0; i < 5; i++)
+    {
+        input_boxes[i] = add_new_item_textbox(140 + (1 * i) * (TEXTBOX_HEIGHT + 20));
+    }
 };
 
-static void set_gui_defaults()
+static Textbox add_new_item_textbox(float y)
 {
-    GuiSetFont(gui.font);
-    GuiSetStyle(DEFAULT, TEXT_SIZE, gui.font_size);
-};
+    Textbox textbox;
+    memset(&textbox, 0, sizeof(textbox));
 
-static void add_new_item_textbox()
-{
-    memset(&new_item_textbox, 0, sizeof(new_item_textbox));
+    textbox.dimensions = (Rectangle){app.S_W / 4.0f - 100, y, 425, TEXTBOX_HEIGHT};
+    textbox.mouse_on_text = false;
+    textbox.letter_count = 0;
+    textbox.font_size = 28;
+    strncpy(textbox.buffer, "\0", sizeof(textbox.buffer));
 
-    new_item_textbox.dimensions = (Rectangle){app.S_W / 2.0f - 100, 180, 225, 50};
-    new_item_textbox.mouse_on_text = false;
-    new_item_textbox.letter_count = 0;
-    new_item_textbox.font_size = 36;
-    strncpy(new_item_textbox.buffer, "\0", sizeof(new_item_textbox.buffer));
+    return textbox;
 };
 
 void draw_main_page()
 {
-    draw_textbox(new_item_textbox.dimensions, LIGHTGRAY);
-    draw_text(&new_item_textbox);
-    if (new_item_textbox.mouse_on_text)
+    for (int i = 0; i < 5; i++)
     {
-        DrawRectangleLines((int)new_item_textbox.dimensions.x, (int)new_item_textbox.dimensions.y,
-                (int)new_item_textbox.dimensions.width, (int)new_item_textbox.dimensions.height, GREEN);
-    } else
-    {
-        DrawRectangleLines((int)new_item_textbox.dimensions.x, (int)new_item_textbox.dimensions.y,
-                (int)new_item_textbox.dimensions.width, (int)new_item_textbox.dimensions.height, RED);
+        draw_textbox(input_boxes[i].dimensions, BLACK);
+        draw_text(&input_boxes[i]);
+
+        DrawRectangleLines((int)input_boxes[i].dimensions.x, (int)input_boxes[i].dimensions.y,
+                (int)input_boxes[i].dimensions.width, (int)input_boxes[i].dimensions.height, input_boxes[i].mouse_on_text ? GREEN : RED);
     }
 };
