@@ -13,8 +13,8 @@ Gui gui;
 int main()
 {
     memset(&app, 0, sizeof(App));
-    app.S_W = 900;
-    app.S_H = 600;
+    app.S_W = 1200;
+    app.S_H = 800;
 
     SetTargetFPS(60);
 

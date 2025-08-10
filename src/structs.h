@@ -30,6 +30,7 @@ struct Item
 typedef struct
 {
     Rectangle   dimensions;
+    Vector2     position;
     bool        mouse_on_text;
     char        buffer[128];
     int         letter_count;
