@@ -39,7 +39,8 @@ typedef struct
 typedef struct
 {
     Rectangle   dimensions;
-    char        label[20];
+    Texture2D   texture;
+    Vector2     position;
     bool        is_pressed;
     int         font_size;
 } Button;
