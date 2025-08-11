@@ -5,7 +5,8 @@
 #include "enums.h"
 #include <raygui.h>
 
-typedef struct Item Item;
+typedef struct Textbox Textbox;
+typedef struct Button Button;
 
 typedef struct
 {
@@ -16,35 +17,35 @@ typedef struct
     int         frame_counter;
 } App;
 
-struct Item
-{
-    bool        is_completed;
-    bool        in_progress;
-    char        date_added[10];
-    char        summary[128];
-    Category    category;
-    Item*       prev;
-    Item*       next;
-};
-
-typedef struct
+struct Textbox
 {
     Rectangle   dimensions;
     Vector2     position;
+    Color       color;
     bool        mouse_on_text;
     char        buffer[128];
     int         letter_count;
     int         font_size;
-} Textbox;
+};
 
-typedef struct
+struct Button
 {
     Rectangle   dimensions;
     Texture2D   texture;
     Vector2     position;
     bool        is_pressed;
+    bool        is_hovered;
     int         font_size;
-} Button;
+    Button_Type btn_type;
+};
+
+typedef struct
+{
+    Textbox     textbox;
+    Button      check_btn;
+    Button      cross_btn;
+    Button      edit_btn;
+} Item;
 
 typedef struct
 {

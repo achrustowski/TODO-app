@@ -8,4 +8,12 @@ typedef enum
     HOBBY
 } Category;
 
+typedef enum
+{
+    NONE,
+    CHECK,
+    CROSS,
+    EDIT
+} Button_Type;
+
 #endif

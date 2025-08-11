@@ -2,6 +2,7 @@
 #include "gui_elements.h"
 #include "defs.h"
 #include "draw.h"
+#include "enums.h"
 #include "raylib.h"
 #include "structs.h"
 #include <string.h>
@@ -10,15 +11,12 @@
 extern App app;
 extern Gui gui;
 
-static Textbox  input_boxes[5];
-static Button   check_buttons[5];
-static Button   cross_buttons[5];
-static Button   edit_buttons[5];
+static Item     list_items[5];
 
 static Textbox add_new_item_textbox(float y);
-static Button add_new_button(float x, float y, float w, float h, char* filename);
+static Button add_new_button(float x, float y, float w, float h, char* filename, int btn_type);
 static void textbox_interact(Textbox* textbox);
-static void buttons_interact(Button* button);
+static void buttons_interact(Button* button, int i);
 static void draw_text(char* text, int x, int y, int font_size);
 static void update_textbox_position(Textbox* textbox, int i);
 static void update_button_position(Button* button, int i, float d);
@@ -27,23 +25,14 @@ void gui_elements_logic()
 {
     for (int i = 0; i < 5; i++)
     {
-        textbox_interact(&input_boxes[i]);
-        update_textbox_position(&input_boxes[i], i);
-    }
-    for (int i = 0; i < 5; i++)
-    {
-        buttons_interact(&check_buttons[i]);
-        update_button_position(&check_buttons[i], i, 6.0f);
-    }
-    for (int i = 0; i < 5; i++)
-    {
-        buttons_interact(&cross_buttons[i]);
-        update_button_position(&cross_buttons[i], i, 4.0f);
-    }
-    for (int i = 0; i < 5; i++)
-    {
-        buttons_interact(&edit_buttons[i]);
-        update_button_position(&edit_buttons[i], i, 3.0f);
+        textbox_interact(&list_items[i].textbox);
+        update_textbox_position(&list_items[i].textbox, i);
+        buttons_interact(&list_items[i].check_btn, i);
+        buttons_interact(&list_items[i].cross_btn, i);
+        buttons_interact(&list_items[i].edit_btn, i);
+        update_button_position(&list_items[i].check_btn, i, 6.0f);
+        update_button_position(&list_items[i].cross_btn, i, 4.0f);
+        update_button_position(&list_items[i].edit_btn, i, 3.0f);
     }
 };
 
@@ -89,17 +78,17 @@ static void textbox_interact(Textbox* textbox)
     }
 };
 
-static void buttons_interact(Button* button)
+static void buttons_interact(Button* button, int i)
 {
     if (CheckCollisionPointRec(GetMousePosition(),
                 (Rectangle){button->position.x, button->position.y, button->dimensions.width, button->dimensions.height}))
     {
-        button->is_pressed = true;
+        button->is_hovered = true;
     } else
     {
-        button->is_pressed = false;
+        button->is_hovered = false;
     }
-    if (button->is_pressed)
+    if (button->is_hovered)
     {
         SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
     }
@@ -115,25 +104,13 @@ void initialize_gui_elements()
 {
     for (int i = 0; i < 5; i++)
     {
-        input_boxes[i] = add_new_item_textbox(app.S_H / 4.0f + i * (TEXTBOX_HEIGHT + app.S_H / 20.0f));
-    }
-
-    for (int i = 0; i < 5; i++)
-    {
-        check_buttons[i] = add_new_button(input_boxes[i].dimensions.width + app.S_W / 6.0f,
-                app.S_H / 4.0f + i * (TEXTBOX_HEIGHT + app.S_H / 20.0f), 48.0f, 48.0f, "./icons/checked.png");
-    }
-
-    for (int i = 0; i < 5; i++)
-    {
-        cross_buttons[i] = add_new_button(input_boxes[i].dimensions.width + app.S_W / 4.0f,
-                app.S_H / 4.0f + i * (TEXTBOX_HEIGHT + app.S_H / 20.0f), 48.0f, 48.0f, "./icons/remove.png");
-    }
-
-    for (int i = 0; i < 5; i++)
-    {
-        edit_buttons[i] = add_new_button(input_boxes[i].dimensions.width + app.S_W / 3.0f,
-                app.S_H / 4.0f + i * (TEXTBOX_HEIGHT + app.S_H / 20.0f), 48.0f, 48.0f, "./icons/pencil.png");
+        list_items[i].textbox = add_new_item_textbox(app.S_H / 4.0f + i * (TEXTBOX_HEIGHT + app.S_H / 20.0f));
+        list_items[i].check_btn = add_new_button(list_items[i].textbox.dimensions.width + app.S_W / 6.0f,
+                app.S_H / 4.0f + i * (TEXTBOX_HEIGHT + app.S_H / 20.0f), 48.0f, 48.0f, "./icons/checked.png", CHECK);
+        list_items[i].cross_btn = add_new_button(list_items[i].textbox.dimensions.width + app.S_W / 4.0f,
+                app.S_H / 4.0f + i * (TEXTBOX_HEIGHT + app.S_H / 20.0f), 48.0f, 48.0f, "./icons/remove.png", CROSS);
+        list_items[i].edit_btn = add_new_button(list_items[i].textbox.dimensions.width + app.S_W / 3.0f,
+                app.S_H / 4.0f + i * (TEXTBOX_HEIGHT + app.S_H / 20.0f), 48.0f, 48.0f, "./icons/pencil.png", EDIT);
     }
 };
 
@@ -146,12 +123,13 @@ static Textbox add_new_item_textbox(float y)
     textbox.mouse_on_text = false;
     textbox.letter_count = 0;
     textbox.font_size = 28;
+    textbox.color = GRAY;
     strncpy(textbox.buffer, "\0", sizeof(textbox.buffer));
 
     return textbox;
 };
 
-static Button add_new_button(float x, float y, float w, float h, char* filename)
+static Button add_new_button(float x, float y, float w, float h, char* filename, int btn_type)
 {
     Button button;
     memset(&button, 0, sizeof(button));
@@ -160,6 +138,8 @@ static Button add_new_button(float x, float y, float w, float h, char* filename)
     button.texture = load_texture(filename);
     button.font_size = 28;
     button.is_pressed = false;
+    button.is_hovered = false;
+    button.btn_type = btn_type;
     button.position = (Vector2){x, y};
 
     return button;
@@ -168,37 +148,36 @@ static Button add_new_button(float x, float y, float w, float h, char* filename)
 static void update_textbox_position(Textbox* textbox, int i)
 {
     textbox->position.x = (app.S_W / 4.0f - app.S_W / 6.0f);
-    textbox->position.y = app.S_H / 4.0f + i * (TEXTBOX_HEIGHT + app.S_H / 20.0f);
+    textbox->position.y = app.S_H / 3.5f + i * (TEXTBOX_HEIGHT + app.S_H / 20.0f);
     textbox->dimensions.width = app.S_W / 2.0f;
     textbox->dimensions.height = TEXTBOX_HEIGHT;
 };
 
 static void update_button_position(Button* button, int i, float d)
 {
-    button->position.x = input_boxes[i].dimensions.width + app.S_W / d;
-    button->position.y = app.S_H / 4.0f + i * (TEXTBOX_HEIGHT + app.S_H / 20.0f);
+    button->position.x = list_items[i].textbox.dimensions.width + app.S_W / d;
+    button->position.y = app.S_H / 3.5f + i * (TEXTBOX_HEIGHT + app.S_H / 20.0f);
 };
 
 void draw_main_page()
 {
     for (int i = 0; i < 5; i++)
     {
-        //draw_textbox(input_boxes[i].dimensions, BLACK);
-        draw_text(input_boxes[i].buffer, input_boxes[i].position.x, input_boxes[i].position.y, input_boxes[i].font_size);
+        draw_text(list_items[i].textbox.buffer, list_items[i].textbox.position.x, list_items[i].textbox.position.y, list_items[i].textbox.font_size);
 
-        DrawRectangleLines((int)input_boxes[i].position.x, (int)input_boxes[i].position.y,
-                (int)input_boxes[i].dimensions.width, (int)input_boxes[i].dimensions.height, input_boxes[i].mouse_on_text ? GREEN : RED);
+        DrawRectangleLines((int)list_items[i].textbox.position.x, (int)list_items[i].textbox.position.y,
+                (int)list_items[i].textbox.dimensions.width, (int)list_items[i].textbox.dimensions.height, list_items[i].textbox.color);
     }
     for (int i = 0; i < 5; i++)
     {
-        DrawTextureRec(check_buttons[i].texture, check_buttons[i].dimensions, check_buttons[i].position, WHITE);
+        DrawTextureRec(list_items[i].check_btn.texture, list_items[i].check_btn.dimensions, list_items[i].check_btn.position, WHITE);
     }
     for (int i = 0; i < 5; i++)
     {
-        DrawTextureRec(cross_buttons[i].texture, cross_buttons[i].dimensions, cross_buttons[i].position, WHITE);
+        DrawTextureRec(list_items[i].cross_btn.texture, list_items[i].cross_btn.dimensions, list_items[i].cross_btn.position, WHITE);
     }
     for (int i = 0; i < 5; i++)
     {
-        DrawTextureRec(edit_buttons[i].texture, edit_buttons[i].dimensions, edit_buttons[i].position, WHITE);
+        DrawTextureRec(list_items[i].edit_btn.texture, list_items[i].edit_btn.dimensions, list_items[i].edit_btn.position, WHITE);
     }
 };
