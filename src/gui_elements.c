@@ -20,7 +20,8 @@ static Textbox add_new_item_textbox(float y);
 static Button add_new_button(float x, float y, float w, float h, const char* filename, int btn_type);
 static void textbox_interact(Textbox* textbox);
 static void buttons_interact(Button buttons[]);
-static void draw_text(char* text, int x, int y, int font_size);
+static void list_logic(void);
+static void draw_text(char* text, int x, int y, int font_size, Color color);
 static void update_textbox_position(Textbox* textbox, int i);
 static void update_button_position(Button* button, int i, float d);
 
@@ -36,6 +37,7 @@ void gui_elements_logic()
         update_button_position(&list_items[i].buttons[3], i, list_items[i].textbox.position.x - (app.S_W / 12.0f));
         buttons_interact(list_items[i].buttons);
     }
+    list_logic();
 };
 
 static void textbox_interact(Textbox* textbox)
@@ -92,37 +94,41 @@ static void buttons_interact(Button buttons[])
             {
                 switch (i)
                 {
-                    case 0:
-                        buttons[0].is_pressed = true;
-                        buttons[1].is_pressed = false;
-                        buttons[2].is_pressed = false;
-                        buttons[3].is_pressed = false;
+                    case CHECK:
+                        buttons[CHECK].is_pressed = true;
+                        buttons[CROSS].is_pressed = false;
+                        buttons[EDIT].is_pressed = false;
+                        buttons[CLEAN].is_pressed = false;
                         break;
-                    case 1:
-                        buttons[0].is_pressed = false;
-                        buttons[1].is_pressed = true;
-                        buttons[2].is_pressed = false;
-                        buttons[3].is_pressed = false;
+                    case CROSS:
+                        buttons[CHECK].is_pressed = false;
+                        buttons[CROSS].is_pressed = true;
+                        buttons[EDIT].is_pressed = false;
+                        buttons[CLEAN].is_pressed = false;
                         break;
-                    case 2:
-                        buttons[0].is_pressed = false;
-                        buttons[1].is_pressed = false;
-                        buttons[2].is_pressed = true;
-                        buttons[3].is_pressed = false;
+                    case EDIT:
+                        buttons[CHECK].is_pressed = false;
+                        buttons[CROSS].is_pressed = false;
+                        buttons[EDIT].is_pressed = true;
+                        buttons[CLEAN].is_pressed = false;
                         break;
-                    case 3:
-                        buttons[0].is_pressed = false;
-                        buttons[1].is_pressed = false;
-                        buttons[2].is_pressed = false;
-                        buttons[3].is_pressed = true;
+                    case CLEAN:
+                        buttons[CHECK].is_pressed = false;
+                        buttons[CROSS].is_pressed = false;
+                        buttons[EDIT].is_pressed = false;
+                        buttons[CLEAN].is_pressed = true;
                         break;
                     default:
-                        buttons[0].is_pressed = false;
-                        buttons[1].is_pressed = false;
-                        buttons[2].is_pressed = false;
-                        buttons[3].is_pressed = false;
+                        buttons[CHECK].is_pressed = false;
+                        buttons[CROSS].is_pressed = false;
+                        buttons[EDIT].is_pressed = false;
+                        buttons[CLEAN].is_pressed = false;
                         break;
                 }
+            }
+            if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+            {
+                buttons[CLEAN].is_pressed = false;
             }
         } else
         {
@@ -131,10 +137,40 @@ static void buttons_interact(Button buttons[])
     }
 };
 
-static void draw_text(char* text, int x, int y, int font_size)
+static void list_logic()
+{
+    for (int i = 0; i < it_size; i++)
+    {
+        if (list_items[i].buttons[CHECK].is_pressed)
+        {
+            list_items[i].textbox.color = GREEN;
+            list_items[i].textbox.font_color = GREEN;
+        }
+        if (list_items[i].buttons[CROSS].is_pressed)
+        {
+            list_items[i].textbox.color = RED;
+            list_items[i].textbox.font_color = RED;
+        }
+        if (list_items[i].buttons[EDIT].is_pressed)
+        {
+            list_items[i].textbox.color = BLUE;
+            list_items[i].textbox.font_color = WHITE;
+        }
+        if (list_items[i].buttons[CLEAN].is_pressed)
+        {
+            list_items[i].textbox.color = GRAY;
+            list_items[i].textbox.font_color = WHITE;
+            list_items[i].textbox.letter_count = 0;
+            memset(list_items[i].textbox.buffer, 0, sizeof(list_items[i].textbox.buffer));
+        }
+    }
+};
+
+static void draw_text(char* text, int x, int y, int font_size, Color color)
 {
     //draw actuall textbox buffer onto the screen, at this point x & y padding values are constants, can they be dynamic?
-    DrawText(text, (int)x + 10, (int)y + 10, font_size, RAYWHITE);
+    //DrawText(text, (int)x + 10, (int)y + 10, font_size, RAYWHITE);
+    DrawTextEx(gui.font, text, (Vector2){(int)x + 10, (int)y + 10}, font_size, 1.0f, color);
 };
 
 void initialize_gui_elements()
@@ -165,7 +201,8 @@ static Textbox add_new_item_textbox(float y)
     textbox.letter_count = 0;
     textbox.font_size = 28;
     textbox.color = GRAY;
-    strncpy(textbox.buffer, "\0", sizeof(textbox.buffer));
+    textbox.font_color = WHITE;
+    //strncpy(textbox.buffer, "\0", sizeof(textbox.buffer));
 
     return textbox;
 };
@@ -204,32 +241,17 @@ void draw_main_page()
 {
     for (int i = 0; i < it_size; i++)
     {
-        draw_text(list_items[i].textbox.buffer, list_items[i].textbox.position.x, list_items[i].textbox.position.y, list_items[i].textbox.font_size);
+        draw_text(list_items[i].textbox.buffer, list_items[i].textbox.position.x,
+                list_items[i].textbox.position.y, list_items[i].textbox.font_size, list_items[i].textbox.font_color);
 
         DrawRectangleLines((int)list_items[i].textbox.position.x, (int)list_items[i].textbox.position.y,
                 (int)list_items[i].textbox.dimensions.width, (int)list_items[i].textbox.dimensions.height, list_items[i].textbox.color);
-        if (list_items[i].buttons[CHECK].is_pressed)
-        {
-            list_items[i].textbox.color = GREEN;
-        }
-        if (list_items[i].buttons[CROSS].is_pressed)
-        {
-            list_items[i].textbox.color = RED;
-        }
-        if (list_items[i].buttons[EDIT].is_pressed)
-        {
-            list_items[i].textbox.color = BLUE;
-        }
-        if (list_items[i].buttons[CLEAN].is_pressed)
-        {
-            list_items[i].textbox.color = GRAY;
-        }
         for (int j = 0; j < btn_size; j++)
         {
             DrawTextureRec(list_items[i].buttons[j].texture, list_items[i].buttons[j].dimensions, list_items[i].buttons[j].position, WHITE);
 
         }
     }
-    draw_text(app.title, app.S_W / 2.1, app.S_H / 10, 30);
+    draw_text(app.title, app.S_W / 2.1, app.S_H / 10, 30, WHITE);
     DrawTextureRec(app.icon, (Rectangle){0.0f, 0.0f, 64.0f, 64.0f}, (Vector2){app.S_W / 2.3, app.S_H / 11.0f}, WHITE);
 };

@@ -25,6 +25,7 @@ struct Textbox
     Rectangle   dimensions;
     Vector2     position;
     Color       color;
+    Color       font_color;
     bool        mouse_on_text;
     char        buffer[128];
     int         letter_count;
