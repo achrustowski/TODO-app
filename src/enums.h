@@ -13,7 +13,7 @@ typedef enum
     CHECK,
     CROSS,
     EDIT,
-    NONE
+    CLEAN
 } Button_Type;
 
 #endif

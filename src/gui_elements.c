@@ -12,7 +12,7 @@ extern App app;
 extern Gui gui;
 
 static const int it_size = 5;
-static const int btn_size = 3;
+static const int btn_size = 4;
 
 static Item list_items[it_size];
 
@@ -30,10 +30,10 @@ void gui_elements_logic()
     {
         textbox_interact(&list_items[i].textbox);
         update_textbox_position(&list_items[i].textbox, i);
-        for (int j = 0; j < btn_size; j++)
-        {
-            update_button_position(&list_items[i].buttons[j], i, 6.0f - ((j > 0) ? j + 1 : 0));
-        }
+        update_button_position(&list_items[i].buttons[0], i, list_items[i].textbox.position.x + list_items[i].textbox.dimensions.width + (app.S_W / 24.0f));
+        update_button_position(&list_items[i].buttons[1], i, list_items[i].textbox.position.x + list_items[i].textbox.dimensions.width + (app.S_W / 9.0f));
+        update_button_position(&list_items[i].buttons[2], i, list_items[i].textbox.position.x + list_items[i].textbox.dimensions.width + (app.S_W / 5.5f));
+        update_button_position(&list_items[i].buttons[3], i, list_items[i].textbox.position.x - (app.S_W / 12.0f));
         buttons_interact(list_items[i].buttons);
     }
 };
@@ -96,21 +96,31 @@ static void buttons_interact(Button buttons[])
                         buttons[0].is_pressed = true;
                         buttons[1].is_pressed = false;
                         buttons[2].is_pressed = false;
+                        buttons[3].is_pressed = false;
                         break;
                     case 1:
                         buttons[0].is_pressed = false;
                         buttons[1].is_pressed = true;
                         buttons[2].is_pressed = false;
+                        buttons[3].is_pressed = false;
                         break;
                     case 2:
                         buttons[0].is_pressed = false;
                         buttons[1].is_pressed = false;
                         buttons[2].is_pressed = true;
+                        buttons[3].is_pressed = false;
+                        break;
+                    case 3:
+                        buttons[0].is_pressed = false;
+                        buttons[1].is_pressed = false;
+                        buttons[2].is_pressed = false;
+                        buttons[3].is_pressed = true;
                         break;
                     default:
                         buttons[0].is_pressed = false;
                         buttons[1].is_pressed = false;
                         buttons[2].is_pressed = false;
+                        buttons[3].is_pressed = false;
                         break;
                 }
             }
@@ -133,14 +143,14 @@ void initialize_gui_elements()
     file_names[0] = "./icons/checked.png";
     file_names[1] = "./icons/remove.png";
     file_names[2] = "./icons/pencil.png";
+    file_names[3] = "./icons/clean.png";
 
     for (int i = 0; i < it_size; i++)
     {
         list_items[i].textbox = add_new_item_textbox(app.S_H / 4.0f + i * (TEXTBOX_HEIGHT + app.S_H / 20.0f));
         for (int j = 0; j < btn_size; j++)
         {
-            list_items[i].buttons[j] = add_new_button(list_items[i].textbox.dimensions.width + app.S_W / (6.0f - ((j > 0) ? (j + 1) : 0)),
-                    app.S_H / 4.0f + i * (TEXTBOX_HEIGHT + app.S_H / 20.0f), 48.0f, 48.0f, file_names[j], j);
+            list_items[i].buttons[j] = add_new_button(0, 0, 48.0f, 48.0f, file_names[j], j);
         }
     }
 };
@@ -150,7 +160,7 @@ static Textbox add_new_item_textbox(float y)
     Textbox textbox;
     memset(&textbox, 0, sizeof(textbox));
 
-    textbox.dimensions = (Rectangle){(app.S_W / 4.0f - app.S_W / 6.0f), y, app.S_W / 2.0f, TEXTBOX_HEIGHT};
+    textbox.dimensions = (Rectangle){(app.S_W / 3.0f - app.S_W / 6.0f), y, app.S_W / 2.0f, TEXTBOX_HEIGHT};
     textbox.mouse_on_text = false;
     textbox.letter_count = 0;
     textbox.font_size = 28;
@@ -178,7 +188,7 @@ static Button add_new_button(float x, float y, float w, float h, const char* fil
 
 static void update_textbox_position(Textbox* textbox, int i)
 {
-    textbox->position.x = (app.S_W / 4.0f - app.S_W / 6.0f);
+    textbox->position.x = (app.S_W / 3.0f - app.S_W / 6.0f);
     textbox->position.y = app.S_H / 3.5f + i * (TEXTBOX_HEIGHT + app.S_H / 20.0f);
     textbox->dimensions.width = app.S_W / 2.0f;
     textbox->dimensions.height = TEXTBOX_HEIGHT;
@@ -186,7 +196,7 @@ static void update_textbox_position(Textbox* textbox, int i)
 
 static void update_button_position(Button* button, int j, float d)
 {
-    button->position.x = list_items[j].textbox.dimensions.width + app.S_W / d;
+    button->position.x = d;
     button->position.y = app.S_H / 3.5f + j * (TEXTBOX_HEIGHT + app.S_H / 20.0f);
 };
 
@@ -209,6 +219,10 @@ void draw_main_page()
         if (list_items[i].buttons[EDIT].is_pressed)
         {
             list_items[i].textbox.color = BLUE;
+        }
+        if (list_items[i].buttons[CLEAN].is_pressed)
+        {
+            list_items[i].textbox.color = GRAY;
         }
         for (int j = 0; j < btn_size; j++)
         {
