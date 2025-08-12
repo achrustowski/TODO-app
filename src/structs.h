@@ -42,9 +42,7 @@ struct Button
 typedef struct
 {
     Textbox     textbox;
-    Button      check_btn;
-    Button      cross_btn;
-    Button      edit_btn;
+    Button      buttons[3];
 } Item;
 
 typedef struct

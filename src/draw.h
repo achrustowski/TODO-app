@@ -4,6 +4,6 @@
 #include <raylib.h>
 
 void draw_textbox(Rectangle textbox, Color color);
-Texture2D load_texture(char* filename);
+Texture2D load_texture(const char* filename);
 
 #endif

@@ -14,7 +14,7 @@ extern Gui gui;
 static Item     list_items[5];
 
 static Textbox add_new_item_textbox(float y);
-static Button add_new_button(float x, float y, float w, float h, char* filename, int btn_type);
+static Button add_new_button(float x, float y, float w, float h, const char* filename, int btn_type);
 static void textbox_interact(Textbox* textbox);
 static void buttons_interact(Button* button, int i);
 static void draw_text(char* text, int x, int y, int font_size);
@@ -27,12 +27,11 @@ void gui_elements_logic()
     {
         textbox_interact(&list_items[i].textbox);
         update_textbox_position(&list_items[i].textbox, i);
-        buttons_interact(&list_items[i].check_btn, i);
-        buttons_interact(&list_items[i].cross_btn, i);
-        buttons_interact(&list_items[i].edit_btn, i);
-        update_button_position(&list_items[i].check_btn, i, 6.0f);
-        update_button_position(&list_items[i].cross_btn, i, 4.0f);
-        update_button_position(&list_items[i].edit_btn, i, 3.0f);
+        for (int j = 0; j < 3; j++)
+        {
+            buttons_interact(&list_items[i].buttons[j], j);
+            update_button_position(&list_items[i].buttons[j], i, 6.0f - ((j > 0) ? j + 1 : 0));
+        }
     }
 };
 
@@ -48,7 +47,7 @@ static void textbox_interact(Textbox* textbox)
     }
     if (textbox->mouse_on_text)
     {
-        SetMouseCursor(MOUSE_CURSOR_IBEAM);
+        //SetMouseCursor(MOUSE_CURSOR_IBEAM);
         int key = GetCharPressed();
 
         while (key > 0)
@@ -74,7 +73,7 @@ static void textbox_interact(Textbox* textbox)
 
     } else
     {
-        SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+        //SetMouseCursor(MOUSE_CURSOR_DEFAULT);
     }
 };
 
@@ -90,7 +89,7 @@ static void buttons_interact(Button* button, int i)
     }
     if (button->is_hovered)
     {
-        SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
+        //SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
     }
 };
 
@@ -102,15 +101,19 @@ static void draw_text(char* text, int x, int y, int font_size)
 
 void initialize_gui_elements()
 {
+    const char* file_names[3];
+    file_names[0] = "./icons/checked.png";
+    file_names[1] = "./icons/remove.png";
+    file_names[2] = "./icons/pencil.png";
+
     for (int i = 0; i < 5; i++)
     {
         list_items[i].textbox = add_new_item_textbox(app.S_H / 4.0f + i * (TEXTBOX_HEIGHT + app.S_H / 20.0f));
-        list_items[i].check_btn = add_new_button(list_items[i].textbox.dimensions.width + app.S_W / 6.0f,
-                app.S_H / 4.0f + i * (TEXTBOX_HEIGHT + app.S_H / 20.0f), 48.0f, 48.0f, "./icons/checked.png", CHECK);
-        list_items[i].cross_btn = add_new_button(list_items[i].textbox.dimensions.width + app.S_W / 4.0f,
-                app.S_H / 4.0f + i * (TEXTBOX_HEIGHT + app.S_H / 20.0f), 48.0f, 48.0f, "./icons/remove.png", CROSS);
-        list_items[i].edit_btn = add_new_button(list_items[i].textbox.dimensions.width + app.S_W / 3.0f,
-                app.S_H / 4.0f + i * (TEXTBOX_HEIGHT + app.S_H / 20.0f), 48.0f, 48.0f, "./icons/pencil.png", EDIT);
+        for (int j = 0; j < 3; j++)
+        {
+            list_items[i].buttons[j] = add_new_button(list_items[i].textbox.dimensions.width + app.S_W / (6.0f - ((j > 0) ? (j + 1) : 0)),
+                    app.S_H / 4.0f + i * (TEXTBOX_HEIGHT + app.S_H / 20.0f), 48.0f, 48.0f, file_names[j], j);
+        }
     }
 };
 
@@ -129,7 +132,7 @@ static Textbox add_new_item_textbox(float y)
     return textbox;
 };
 
-static Button add_new_button(float x, float y, float w, float h, char* filename, int btn_type)
+static Button add_new_button(float x, float y, float w, float h, const char* filename, int btn_type)
 {
     Button button;
     memset(&button, 0, sizeof(button));
@@ -167,17 +170,9 @@ void draw_main_page()
 
         DrawRectangleLines((int)list_items[i].textbox.position.x, (int)list_items[i].textbox.position.y,
                 (int)list_items[i].textbox.dimensions.width, (int)list_items[i].textbox.dimensions.height, list_items[i].textbox.color);
-    }
-    for (int i = 0; i < 5; i++)
-    {
-        DrawTextureRec(list_items[i].check_btn.texture, list_items[i].check_btn.dimensions, list_items[i].check_btn.position, WHITE);
-    }
-    for (int i = 0; i < 5; i++)
-    {
-        DrawTextureRec(list_items[i].cross_btn.texture, list_items[i].cross_btn.dimensions, list_items[i].cross_btn.position, WHITE);
-    }
-    for (int i = 0; i < 5; i++)
-    {
-        DrawTextureRec(list_items[i].edit_btn.texture, list_items[i].edit_btn.dimensions, list_items[i].edit_btn.position, WHITE);
+        for (int j = 0; j < 3; j++)
+        {
+            DrawTextureRec(list_items[i].buttons[j].texture, list_items[i].buttons[j].dimensions, list_items[i].buttons[j].position, WHITE);
+        }
     }
 };
