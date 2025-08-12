@@ -10,10 +10,10 @@ typedef enum
 
 typedef enum
 {
-    NONE,
     CHECK,
     CROSS,
-    EDIT
+    EDIT,
+    NONE
 } Button_Type;
 
 #endif
