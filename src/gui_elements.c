@@ -230,4 +230,6 @@ void draw_main_page()
 
         }
     }
+    draw_text(app.title, app.S_W / 2.1, app.S_H / 10, 30);
+    DrawTextureRec(app.icon, (Rectangle){0.0f, 0.0f, 64.0f, 64.0f}, (Vector2){app.S_W / 2.3, app.S_H / 11.0f}, WHITE);
 };

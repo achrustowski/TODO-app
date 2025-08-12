@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include "enums.h"
+#include "raylib.h"
 #include <raygui.h>
 
 typedef struct Textbox Textbox;
@@ -14,7 +15,9 @@ typedef struct
     bool        show_new_item_screen;
     int         S_W;
     int         S_H;
-    int         frame_counter;
+    Color       bg_color;
+    char        title[20];
+    Texture2D   icon;
 } App;
 
 struct Textbox

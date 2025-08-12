@@ -3,6 +3,7 @@
 #include "gui_elements.h"
 #include "init.h"
 #include "structs.h"
+#include "draw.h"
 
 #define RAYGUI_IMPLEMENTATION
 #include <raygui.h>
@@ -15,6 +16,8 @@ int main()
     memset(&app, 0, sizeof(App));
     app.S_W = 1200;
     app.S_H = 800;
+    app.bg_color = (Color){0, 8, 20, 125};
+    strcpy(app.title, "List");
 
     SetTargetFPS(60);
 
@@ -25,6 +28,7 @@ int main()
     init_fonts();
     init_gui_style();
     initialize_gui_elements();
+    app.icon = load_texture("./icons/to-do.png");
 
     while (!WindowShouldClose())
     {
@@ -35,7 +39,7 @@ int main()
         }
         gui_elements_logic();
         BeginDrawing();
-        ClearBackground(BLACK);
+        ClearBackground(app.bg_color);
         draw_main_page();
         EndDrawing();
     }
