@@ -11,7 +11,7 @@ Simple to use TO-DO app written in C using Raylib 5 library. All UI components a
 ## Known bugs:
 - text will overflow the textbox
 
-### Stretch goals:
+## Stretch goals:
 - stretch goal: multiple tabs/pages
 - stretch goal: multiple users
 
